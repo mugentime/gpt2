@@ -1,0 +1,61 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binance Dashboard</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f4f6f8; }
+        h1 { margin-bottom: 20px; }
+        button { padding: 10px 20px; margin-right: 10px; background: #007bff; color: white; border: none; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 8px; border: 1px solid #ccc; text-align: left; }
+        th { background: #007bff; color: white; }
+    </style>
+</head>
+<body>
+    <h1>📈 Binance Futures Dashboard</h1>
+    <button onclick="loadAccount()">🔍 Load Account</button>
+    <button onclick="loadTrades()">📑 Load Trades</button>
+    <h2>Account Info</h2>
+    <pre id="account"></pre>
+    <h2>Trades (BTCUSDT)</h2>
+    <table id="trades">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Side</th>
+                <th>Price</th>
+                <th>Qty</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <script>
+        async function loadAccount() {
+            const res = await fetch('/binance/futures/account');
+            const data = await res.json();
+            document.getElementById('account').textContent = JSON.stringify(data.data, null, 2);
+        }
+        async function loadTrades() {
+            const res = await fetch('/binance/futures/trades?symbol=BTCUSDT');
+            const data = await res.json();
+            const tbody = document.querySelector('#trades tbody');
+            tbody.innerHTML = '';
+            data.data.forEach(trade => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${trade.orderId}</td>
+                    <td>${trade.side || (trade.isBuyer ? 'BUY' : 'SELL')}</td>
+                    <td>${trade.price}</td>
+                    <td>${trade.qty}</td>
+                    <td>${new Date(trade.time).toLocaleString()}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+    </script>
+</body>
+</html>
